@@ -4,18 +4,18 @@ STACKNAME ?= aws-serverless-shopping-cart
 
 build:
 	@echo "Building template $(TEMPLATE).yaml..."
-	@sam build -t $(TEMPLATE).yaml
+	@samlocal build -u -t $(TEMPLATE).yaml --region $(REGION)
 
 deploy:  # s3 bucket still needed for layer
 	@echo "Deploying stack $(STACKNAME)-$(TEMPLATE)..."
-	@sam deploy --capabilities CAPABILITY_NAMED_IAM --stack-name $(STACKNAME)-$(TEMPLATE) --s3-bucket $(S3_BUCKET) --parameter-overrides AllowedOrigin=$(ORIGIN) --no-fail-on-empty-changeset
+	@samlocal deploy --capabilities CAPABILITY_NAMED_IAM --stack-name $(STACKNAME)-$(TEMPLATE) --s3-bucket $(S3_BUCKET) --parameter-overrides AllowedOrigin=$(ORIGIN) --no-fail-on-empty-changeset --region $(REGION)
 
 tests:
 	py.test -v
 
 delete:
-	@aws cloudformation delete-stack --stack-name $(STACKNAME)-$(TEMPLATE)
+	@awslocal cloudformation delete-stack --stack-name $(STACKNAME)-$(TEMPLATE) --region $(REGION)
 	@echo "Waiting for stack $(STACKNAME)-$(TEMPLATE) to be deleted..."
-	@aws cloudformation wait stack-delete-complete --stack-name $(STACKNAME)-$(TEMPLATE)
+	@awslocal cloudformation wait stack-delete-complete --stack-name $(STACKNAME)-$(TEMPLATE) --region $(REGION)
 
 .PHONY: build package deploy delete

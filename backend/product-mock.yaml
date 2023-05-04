@@ -60,10 +60,10 @@ Resources:
     Properties:
       Type: String
       Name: /serverless-shopping-cart-demo/products/products-api-url
-      Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
+      Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.localhost.localstack.cloud/Prod"
 
 
 Outputs:
   ProductApi:
     Description: "API Gateway endpoint URL for Prod stage for Product Mock Service"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.localhost.localstack.cloud/Prod"
