@@ -34,6 +34,8 @@ The Serverless Shopping Cart with API Gateway, Lambda, Cognito, SQS, DynamoDB, a
 - [AWS CLI](https://docs.localstack.cloud/user-guide/integrations/aws-cli/) with the [`awslocal` wrapper](https://docs.localstack.cloud/user-guide/integrations/aws-cli/#localstack-aws-cli-awslocal).
 - [Node.js](https://nodejs.org/en/download/) with [`yarn`](https://yarnpkg.com/getting-started/install) installed.
 - [Python 3.8.0](https://www.python.org/downloads/release/python-380/) in the `PATH`
+- [LocalSurf](https://docs.localstack.cloud/user-guide/tools/localsurf/) to repoint AWS service calls to LocalStack in the web app.
+
 
 Start LocalStack Pro with the `LOCALSTACK_API_KEY` pre-configured:
 
@@ -81,14 +83,21 @@ To set up the front-end, run the following command:
 make frontend-serve 
 ```
 
-The above command will install the dependencies, run a Node.js script to retrieve backend configuration from the SSM parameter and store to a .env.local` file. The application is then served locally at `http://localhost:8080`.
+> If you see an error for the frontend deployment, similar to `error:0308010C:digital envelope routines::unsupported at new Hash` this is probably related to your Node-js version. Please run `NODE_OPTIONS="--openssl-legacy-provider" make frontend-serve` in that case. 
+
+The above command will install the dependencies, run a Node.js script to retrieve backend configuration from the SSM parameter and store to a `.env.local` file. The application is then served locally at `http://localhost:8080`.
 
 > CORS headers on the backend service default to allowing `http://localhost:8080/`. You will see CORS errors if 
 you access the frontend using the IP (`http://127.0.0.1:8080/`) or a port other than `8080`.
 
 ### Testing the application
 
-TODO
+To run the application, we need the [LocalSurf](https://docs.localstack.cloud/user-guide/tools/localsurf/) browser plugin installed and enabled. Ideally, your applications should use configuration files to specify their AWS services. However, we inherited hard-coded AWS service endpoints in this sample application, which we need to repoint to LocalStack. We can do this using the LocalSurf browser plugin.
+
+In your browser, navigate to http://localhost:8080. You can now create a new account, and login. Even when you are not logged in, you can add or remove items to your shopping cart.
+For the checkout you will be asked to enter some data. Afterwards, the shopping cart will be empty. 
+
+> Note: When you first access the website, the Lambda functions start for the first time and therefore may need a few seconds to startup. Subsequent calls will be way faster.
 
 ### GitHub Action
 
