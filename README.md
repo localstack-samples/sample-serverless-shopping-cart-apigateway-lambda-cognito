@@ -41,7 +41,7 @@ Start LocalStack Pro with the `LOCALSTACK_API_KEY` pre-configured:
 
 ```shell
 export LOCALSTACK_API_KEY=<your-api-key>
-DISABLE_CUSTOM_CORS_APIGATEWAY=1 EXTRA_CORS_ALLOWED_ORIGINS=http://localhost:8080 DEBUG=1 localstack start
+EXTRA_CORS_ALLOWED_ORIGINS=http://localhost:8080 DEBUG=1 localstack start
 ```
 
 The `EXTRA_CORS_ALLOWED_ORIGINS` configuration variable allows our website to send requests to the container APIs. We specified `DEBUG=1` to get the printed LocalStack logs directly in the terminal (it helps later, when we need to get the Cognito confirmation code). If you prefer running LocalStack in detached mode, you can add the `-d` flag to the `localstack start` command, and use Docker Desktop to view the logs.
