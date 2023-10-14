@@ -426,9 +426,9 @@ Resources:
     Properties:
       Type: String
       Name: /serverless-shopping-cart-demo/shopping-cart/cart-api-url
-      Value: !Sub "https://${CartApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
+      Value: !Sub "https://${CartApi}.execute-api.${AWS::Region}.localhost.localstack.cloud/Prod"
 
 Outputs:
   CartApi:
     Description: "API Gateway endpoint URL for Prod stage for Cart Service"
-    Value: !Sub "https://${CartApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
+    Value: !Sub "https://${CartApi}.execute-api.${AWS::Region}.localhost.localstack.cloud/Prod"

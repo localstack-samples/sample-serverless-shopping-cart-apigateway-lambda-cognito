@@ -30,7 +30,6 @@ export async function getCart() {
     return getHeaders(true).then(
         headers => API.get("CartAPI", "/cart", {
             headers: headers,
-            withCredentials: true
         }))
 }
 
@@ -42,7 +41,6 @@ export async function postCart(obj, quantity = 1) {
                 quantity: quantity,
             },
             headers: headers,
-            withCredentials: true
         })
     )
 }
@@ -55,7 +53,6 @@ export async function putCart(obj, quantity) {
                 quantity: quantity,
             },
             headers: headers,
-            withCredentials: true
         })
     )
 }
@@ -72,7 +69,6 @@ export async function cartMigrate() {
     return getHeaders(true).then(
         headers => API.post("CartAPI", "/cart/migrate", {
             headers: headers,
-            withCredentials: true
         })
     )
 }
@@ -81,7 +77,6 @@ export async function cartCheckout() {
     return getHeaders(true).then(
         headers => API.post("CartAPI", "/cart/checkout", {
             headers: headers,
-            withCredentials: true
         })
     )
 }

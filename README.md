@@ -1,164 +1,110 @@
-# Serverless Shopping Cart Microservice
+# Serverless Shopping Cart with API Gateway, Lambda, Cognito, SQS, DynamoDB, and Amplify SDK
 
-This application is a sample application to demonstrate how you could implement a shopping cart microservice using 
-serverless technologies on AWS. The backend is built as a REST API interface, making use of [Amazon API Gateway](https://aws.amazon.com/api-gateway/), [AWS Lambda](https://aws.amazon.com/lambda/), [Amazon Cognito](https://aws.amazon.com/cognito/), and [Amazon DynamoDB](https://aws.amazon.com/dynamodb/). The frontend is a Vue.js application using the [AWS Amplify](https://aws-amplify.github.io/) SDK for authentication and communication with the API.
+| Key          | Value                                                                                 |
+| ------------ | ------------------------------------------------------------------------------------- |
+| Environment  | <img src="https://img.shields.io/badge/LocalStack-deploys-4D29B4.svg?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAKgAAACoABZrFArwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAALbSURBVHic7ZpNaxNRFIafczNTGIq0G2M7pXWRlRv3Lusf8AMFEQT3guDWhX9BcC/uFAr1B4igLgSF4EYDtsuQ3M5GYrTaj3Tmui2SpMnM3PlK3m1uzjnPw8xw50MoaNrttl+r1e4CNRv1jTG/+v3+c8dG8TSilHoAPLZVX0RYWlraUbYaJI2IuLZ7KKUWCisgq8wF5D1A3rF+EQyCYPHo6Ghh3BrP8wb1en3f9izDYlVAp9O5EkXRB8dxxl7QBoNBpLW+7fv+a5vzDIvVU0BELhpjJrmaK2NMw+YsIxunUaTZbLrdbveZ1vpmGvWyTOJToNlsuqurq1vAdWPMeSDzwzhJEh0Bp+FTmifzxBZQBXiIKaAq8BBDQJXgYUoBVYOHKQRUER4mFFBVeJhAQJXh4QwBVYeHMQJmAR5GCJgVeBgiYJbg4T8BswYPp+4GW63WwvLy8hZwLcd5TudvBj3+OFBIeA4PD596nvc1iiIrD21qtdr+ysrKR8cY42itCwUP0Gg0+sC27T5qb2/vMunB/0ipTmZxfN//orW+BCwmrGV6vd63BP9P2j9WxGbxbrd7B3g14fLfwFsROUlzBmNM33XdR6Meuxfp5eg54IYxJvXCx8fHL4F3w36blTdDI4/0WREwMnMBeQ+Qd+YC8h4g78wF5D1A3rEqwBiT6q4ubpRSI+ewuhP0PO/NwcHBExHJZZ8PICI/e73ep7z6zzNPwWP1djhuOp3OfRG5kLROFEXv19fXP49bU6TbYQDa7XZDRF6kUUtEtoFb49YUbh/gOM7YbwqnyG4URQ/PWlQ4ASllNwzDzY2NDX3WwioKmBgeqidgKnioloCp4aE6AmLBQzUExIaH8gtIBA/lFrCTFB7KK2AnDMOrSeGhnAJSg4fyCUgVHsolIHV4KI8AK/BQDgHW4KH4AqzCQwEfiIRheKKUAvjuuu7m2tpakPdMmcYYI1rre0EQ1LPo9w82qyNziMdZ3AAAAABJRU5ErkJggg==">                     |
+| Services     | API Gateway, Cognito, Lambda, DynamoDB, SQS                    |
+| Integrations | Serverless Application Model, CloudFormation, Amplify                                                    |
+| Categories   | Serverless; Application Development                            |
+| Level        | Intermediate                                                                          |
+| GitHub       | [Repository link](https://github.com/aws-samples/aws-serverless-shopping-cart) |
 
-To assist in demonstrating the functionality, a bare bones mock "products" service has also been included. Since the 
-authentication parts are likely to be shared between components, there is a separate template for it. The front-end 
-doesn't make any real payment integration at this time.
+## Introduction
 
-## Architecture & Design
+The Serverless Shopping Cart with API Gateway, Lambda, Cognito, SQS, DynamoDB, and Amplify SDK demonstrates how to implement a shopping cart microservice with an integrated frontend built using Vue.js. The application sample displays a mock products page that enables users to add items to the cart without authentication, which is persisted across browser restarts. After logging in, the products are shifted to the user's cart and are removed if logging out. The products in an anonymous cart are terminated after some time, while an authenticated user's cart is persisted. Users can deploy this application sample on AWS & LocalStack using Serverless Application Model (SAM), CloudFormation, and Amplify SDK with minimal changes. To test this application sample, we will demonstrate how you use LocalStack to deploy the infrastructure on your developer machine and your CI environment.
 
-![Architecture Diagram](./images/architecture.png)
-
-## Design Notes
-
-Before building the application, I set some requirements on how the cart should behave:
-
-- Users should be able to add items to the cart without logging in (an "anonymous cart"), and that cart should persist 
-across browser restarts etc.
-- When logging in, if there were products in an anonymous cart, they should be added to the user's cart from any 
-previous logged in sessions.
-- When logging out, the anonymous cart should not have products in it any longer.
-- Items in an anonymous cart should be removed after a period of time, and items in a logged in cart should persist 
-for a longer period.
-- Admin users to be able to get an aggregated view of the total number of each product in users' carts at any time.
-
-### Cart Migration
-
-When an item is added to the cart, an item is written in DynamoDB with an identifier which matches a randomly generated 
-(uuid) cookie which is set in the browser. This allows a user to add items to cart and come back to the page later 
-without losing the items they have added. When the user logs in, these items will be removed, and replaced with items 
-with a user id as the pk. If the user already had that product in their cart from a previous logged in session, the 
-quantities would be summed. Because we don't need the deletion of old items to happen immediately as part of a 
-synchronous workflow, we put messages onto an SQS queue, which triggers a worker function to delete the messages.  
-
-To expire items from users' shopping carts, DynamoDB's native functionality is used where a TTL is written along with 
-the item, after which the item should be removed. In this implementation, the TTL defaults to 1 day for anonymous 
-carts, and 7 days for logged in carts.  
-
-### Aggregated View of Products in Carts
-
-It would be possible to scan our entire DynamoDB table and sum up the quantities of all the products, but this will be 
-expensive past a certain scale. Instead, we can calculate the total as a running process, and keep track of the total 
-amount.  
-
-When an item is added, deleted or updated in DynamoDB, an event is put onto DynamoDB Streams, which in turn triggers a 
-Lambda function. This function calculates the change in total quantity for each product in users' carts, and writes the 
-quantity back to DynamoDB. The Lambda function is configured so that it will run after either 60 seconds pass, or 100 
-new events are on the stream. This would enable an admin user to get real time data about the popular products, which 
-could in turn help anticipate inventory. In this implementation, the API is exposed without authentication to 
-demonstrate the functionality.  
+## Architecture diagram
 
 
-## Api Design
+| Endpoint                   | Method | Description                                                                                                                     |
+| -------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| `/cart`                    | `GET`  | Retrieve the shopping cart for a user, whether anonymous or logged in.                                                          |
+| `/cart`                    | `POST` | Accepts a JSON payload containing product ID and quantity. Adds the specified quantity of an item to the cart.                  |
+| `/cart/migrate`            | `POST` | This endpoint is called after logging in to migrate items from an anonymous user's cart to the logged-in user's cart.           |
+| `/cart/checkout`           | `POST` | Empty the shopping cart.                                                                                                        |
+| `/cart/{product-id}`       | `PUT`  | Accepts a JSON payload containing product ID and quantity. Updates the quantity of the specified item in the cart.              |
+| `/cart/{product-id}/total` | `GET`  | Retrieve the total amount of a given product across all carts. This API is not used by the frontend but can be manually tested. |
+| `/product`                 | `GET`  | Retrieve details for all products.                                                                                              |
+| `/product/{product_id}`    | `GET`  | Retrieve details for a single product.                                                                                          |
 
-### Shopping Cart Service
+## Instructions
 
-GET  
-`/cart`  
-Retrieves the shopping cart for a user who is either anonymous or logged in.  
+- LocalStack Pro with the [`localstack` CLI](https://docs.localstack.cloud/getting-started/installation/#localstack-cli).
+- [Serverless Application Model](https://docs.localstack.cloud/user-guide/integrations/aws-sam/) with the [`samlocal`](https://github.com/localstack/aws-sam-cli-local) installed.
+- [AWS CLI](https://docs.localstack.cloud/user-guide/integrations/aws-cli/) with the [`awslocal` wrapper](https://docs.localstack.cloud/user-guide/integrations/aws-cli/#localstack-aws-cli-awslocal).
+- [Node.js](https://nodejs.org/en/download/) with [`yarn`](https://yarnpkg.com/getting-started/install) installed.
+- [Python 3.8.0](https://www.python.org/downloads/release/python-380/) in the `PATH`
+- [LocalSurf](https://docs.localstack.cloud/user-guide/tools/localsurf/) to repoint AWS service calls to LocalStack in the web app.
 
-POST  
-`/cart`  
-Accepts a product id and quantity as json. Adds specified quantity of an item to cart.  
 
-`/cart/migrate`  
-Called after logging in - migrates items in an anonymous user's cart to belong to their logged in user. If you already 
-have a cart on your logged in user, your "anonymous cart" will be merged with it when you log in.
+Start LocalStack Pro with the `LOCALSTACK_API_KEY` pre-configured:
 
-`/cart/checkout`  
-Currently just empties cart.
-
-PUT  
-`/cart/{product-id}`  
-Accepts a product id and quantity as json. Updates quantity of given item to provided quantity.  
-
-GET  
-`/cart/{product-id}/total`  
-Returns the total amount of a given product across all carts. This API is not used by the frontend but can be manually 
-called to test.  
-
-### Product Mock Service
-
-GET  
-`/product`  
-Returns details for all products.  
-
-`/product/{product_id}`  
-Returns details for a single product.  
-
-## Running the Example
-
-### Requirements
-
-python >= 3.8.0
-boto3
-SAM CLI, >= version 0.50.0  
-AWS CLI  
-yarn  
-
-### Setup steps
-
-Fork the github repo, then clone your fork locally: 
-`git clone https://github.com/<your-github-username>/aws-serverless-shopping-cart && cd aws-serverless-shopping-cart`
-
-If you wish to use a named profile for your AWS credentials, you can set the environment variable `AWS_PROFILE` before 
-running the below commands. For a profile named "development": `export AWS_PROFILE=development`.  
-
-You now have 2 options - you can deploy the backend and run the frontend locally, or you can deploy the whole project 
-using the AWS Amplify console.
-
-## Option 1 - Deploy backend and run frontend locally
-### Deploy the Backend
-
-An S3 bucket will be automatically created for you which will be used for deploying source code to AWS. If you wish to 
-use an existing bucket instead, you can manually set the `S3_BUCKET` environment variable to the name of your bucket.  
-
-Build and deploy the resources:  
-``` bash
-make backend  # Creates S3 bucket if not existing already, then deploys CloudFormation stacks for authentication, a 
-product mock service and the shopping cart service.  
+```shell
+export LOCALSTACK_API_KEY=<your-api-key>
+EXTRA_CORS_ALLOWED_ORIGINS=http://localhost:8080 DEBUG=1 localstack start
 ```
 
-### Run the Frontend Locally
+The `EXTRA_CORS_ALLOWED_ORIGINS` configuration variable allows our website to send requests to the container APIs. We specified `DEBUG=1` to get the printed LocalStack logs directly in the terminal (it helps later, when we need to get the Cognito confirmation code). If you prefer running LocalStack in detached mode, you can add the `-d` flag to the `localstack start` command, and use Docker Desktop to view the logs.
 
-Start the frontend locally:  
-``` bash
-make frontend-serve  # Retrieves backend config from ssm parameter store to a .env file, then starts service.  
+## Instructions
+
+### Deploying the application
+
+To build and deploy the resources, run the following command:
+
+```shell
+make backend
 ```
 
-Once the service is running, you can access the frontend on http://localhost:8080/ and start adding items to your cart. 
-You can create an account by clicking on "Sign In" then "Create Account". Be sure to use a valid email address as 
-you'll need to retrieve the verification code.
+The above command will create an S3 bucket, deploys CloudFormation stacks for authentication, and set up a mock product and shopping cart services. Alternatively, if you wish to use a custom S3 bucket, set the `S3_BUCKET` environment variable to the name of your bucket.
 
-**Note:** CORS headers on the backend service default to allowing http://localhost:8080/. You will see CORS errors if 
-you access the frontend using the ip (http://127.0.0.1:8080/), or using a port other than 8080.  
+The CloudFormation events from the stack operations will take a few seconds to complete. You can view the status of the stack operations in the terminal or the [CloudFormation resource browser](https://app.localstack.cloud/resources/cloudformation/stacks). On completion, the terminal will display the following message:
 
-### Clean Up
-Delete the CloudFormation stacks created by this project:
-``` bash
-make backend-delete
+```shell
+CloudFormation outputs from deployed stack
+------------------------------------------------------------------------------------------------------------------------------------------------
+Outputs                                                                                                                                                           
+------------------------------------------------------------------------------------------------------------------------------------------------
+Key                 CartApi                                                                                                                                       
+Description         API Gateway endpoint URL for Prod stage for Cart Service                                                                                      
+Value               https://0fi59sk3kb.execute-api.localhost.localstack.cloud:4566/Prod                                                                           
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+Successfully created/updated stack - aws-serverless-shopping-cart-shoppingcart-service in us-east-1
 ```
 
-## Option 2 - Automatically deploy backend and frontend using Amplify Console
+> If the SAM application build fails, you can check if you have the Python 3.8 installed and in the `PATH`. Alternatively, use [`pyenv`](https://github.com/pyenv/pyenv) to switch between multiple versions of Python.
 
+### Setting up the front-end
 
-[![One-click deployment](https://oneclick.amplifyapp.com/button.svg)](https://console.aws.amazon.com/amplify/home#/deploy?repo=https://github.com/aws-samples/aws-serverless-shopping-cart)
+To set up the front-end, run the following command:
 
-1) Use **1-click deployment** button above, and continue by clicking "Connect to Github"
-2) If you don't have an IAM Service Role with admin permissions, select "Create new role". Otherwise proceed to step 5) 
-3) Select "Amplify" from the drop-down, and select "Amplify - Backend Deployment", then click "Next".
-4) Click "Next" again, then give the role a name and click "Create role"
-5) In the Amplify console and select the role you created, then click "Save and deploy"
-6) Amplify Console will fork this repository into your GitHub account and deploy it for you
-7) You should now be able to see your app being deployed in the [Amplify Console](https://console.aws.amazon.com/amplify/home)
-8) Within your new app in Amplify Console, wait for deployment to complete (this should take approximately 12 minutes for the first deploy)
+```shell
+make frontend-serve 
+```
 
+> If you see an error for the frontend deployment, similar to `error:0308010C:digital envelope routines::unsupported at new Hash` this is probably related to your Node-js version. Please run `NODE_OPTIONS="--openssl-legacy-provider" make frontend-serve` in that case. 
 
-### Clean Up
-Delete the CloudFormation stacks created by this project. There are 3 of them, with names starting with "aws-serverless-shopping-cart-".
+The above command will install the dependencies, run a Node.js script to retrieve backend configuration from the SSM parameter and store to a `.env.local` file. The application is then served locally at `http://localhost:8080`.
 
-## License
+> CORS headers on the backend service default to allowing `http://localhost:8080/`. You will see CORS errors if 
+you access the frontend using the IP (`http://127.0.0.1:8080/`) or a port other than `8080`.
 
-This library is licensed under the MIT-0 License. See the [LICENSE](LICENSE) file.  
+### Testing the application
+
+To run the application, we need the [LocalSurf](https://docs.localstack.cloud/user-guide/tools/localsurf/) browser plugin installed and enabled. Ideally, your applications should use configuration files to specify their AWS services. However, we inherited hard-coded AWS service endpoints in this sample application, which we need to repoint to LocalStack. We can do this using the LocalSurf browser plugin.
+
+In your browser, navigate to http://localhost:8080. You can now create a new account, and login. Even when you are not logged in, you can add or remove items to your shopping cart.
+For the checkout you will be asked to enter some data. Afterwards, the shopping cart will be empty. 
+
+> Note: When you first access the website, the Lambda functions start for the first time and therefore may need a few seconds to startup. Subsequent calls will be way faster.
+
+### GitHub Action
+
+This application sample hosts an example GitHub Action workflow that starts up LocalStack, deploys the infrastructure, and checks the created resources using `awslocal`. You can find the workflow in the `.github/workflows/main.yml` file. To run the workflow, you can fork this repository and push a commit to the `main` branch.
+
+Users can adapt this example workflow to run in their own CI environment. LocalStack supports various CI environments, including GitHub Actions, CircleCI, Jenkins, Travis CI, and more. You can find more information about the CI integration in the [LocalStack documentation](https://docs.localstack.cloud/user-guide/ci/).
+
+## Learn more
+
+The sample application is based on a [public AWS sample app](https://github.com/aws-samples/aws-serverless-shopping-cart) that deploys a shopping cart microservice using serverless technologies on AWS.

@@ -13,6 +13,7 @@ HEADERS = {
     "Access-Control-Allow-Origin": os.environ.get("ALLOWED_ORIGIN"),
     "Access-Control-Allow-Headers": "Content-Type",
     "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
+    "Access-Control-Allow-Credentials": True,
 }
 
 
