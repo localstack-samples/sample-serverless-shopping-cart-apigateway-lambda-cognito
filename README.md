@@ -11,10 +11,13 @@
 
 ## Introduction
 
-The Serverless Shopping Cart with API Gateway, Lambda, Cognito, SQS, DynamoDB, and Amplify SDK demonstrates how to implement a shopping cart microservice with an integrated frontend built using Vue.js. The application sample displays a mock products page that enables users to add items to the cart without authentication, which is persisted across browser restarts. After logging in, the products are shifted to the user's cart and are removed if logging out. The products in an anonymous cart are terminated after some time, while an authenticated user's cart is persisted. Users can deploy this application sample on AWS & LocalStack using Serverless Application Model (SAM), CloudFormation, and Amplify SDK with minimal changes. To test this application sample, we will demonstrate how you use LocalStack to deploy the infrastructure on your developer machine and your CI environment.
+The Serverless Shopping Cart with API Gateway, Lambda, Cognito, SQS, DynamoDB, and Amplify SDK demonstrates how to implement a shopping cart microservice with an integrated frontend built using Vue.js. The application sample displays a mock products page that enables users to add items to the cart without authentication, which is persisted across browser restarts. After logging in, the products are shifted to the user's cart and are removed if logging out. 
+
+The products in an anonymous cart are terminated after some time, while an authenticated user's cart is persisted. Users can deploy this application sample on AWS & LocalStack using Serverless Application Model (SAM), CloudFormation, and Amplify SDK with minimal changes. To test this application sample, we will demonstrate how you use LocalStack to deploy the infrastructure on your developer machine and your CI environment.
 
 ## Architecture diagram
 
+![Architecture Diagram for Serverless Shopping Cart with API Gateway, Lambda, Cognito, SQS, DynamoDB, and Amplify SDK](images/architecture-diagram.png)
 
 | Endpoint                   | Method | Description                                                                                                                     |
 | -------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------- |
