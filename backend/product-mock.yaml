@@ -10,10 +10,10 @@ Parameters:
 
 Globals:
   Function:
-    Timeout: 5
+    Timeout: 300
     Tracing: Active
     AutoPublishAlias: live
-    Runtime: python3.8
+    Runtime: python3.9
     MemorySize: 256
     Environment:
       Variables:

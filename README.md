@@ -40,10 +40,10 @@ The products in an anonymous cart are terminated after some time, while an authe
 - [LocalSurf](https://docs.localstack.cloud/user-guide/tools/localsurf/) to repoint AWS service calls to LocalStack in the web app.
 
 
-Start LocalStack Pro with the `LOCALSTACK_API_KEY` pre-configured:
+Start LocalStack Pro with the `LOCALSTACK_AUTH_TOKEN` pre-configured:
 
 ```shell
-export LOCALSTACK_API_KEY=<your-api-key>
+export LOCALSTACK_AUTH_TOKEN=<your-auth-token>
 EXTRA_CORS_ALLOWED_ORIGINS=http://localhost:8080 DEBUG=1 localstack start
 ```
 
