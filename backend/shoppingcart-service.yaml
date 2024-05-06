@@ -20,11 +20,11 @@ Parameters:
 
 Globals:
   Function:
-    Timeout: 5
+    Timeout: 300
     MemorySize: 512
     Tracing: Active
     AutoPublishAlias: live
-    Runtime: python3.8
+    Runtime: python3.9
     Layers:
       - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPython:3
     Environment:
@@ -50,9 +50,9 @@ Resources:
     Properties:
       ContentUri: ./layers/
       CompatibleRuntimes:
-        - python3.8
+        - python3.9
     Metadata:
-      BuildMethod: python3.8
+      BuildMethod: python3.9
 
   CartApi:
     Type: AWS::Serverless::Api
@@ -250,7 +250,7 @@ Resources:
     Properties:
       CodeUri: shopping-cart-service/
       Handler: migrate_cart.lambda_handler
-      Timeout: 30
+      Timeout: 300
       Layers:
         - !Ref UtilsLayer
       Environment:
@@ -276,7 +276,7 @@ Resources:
     Properties:
       CodeUri: shopping-cart-service/
       Handler: checkout_cart.lambda_handler
-      Timeout: 10
+      Timeout: 300
       Layers:
         - !Ref UtilsLayer
       Environment:
@@ -301,7 +301,7 @@ Resources:
     Properties:
       CodeUri: shopping-cart-service/
       Handler: get_cart_total.lambda_handler
-      Timeout: 10
+      Timeout: 300
       Layers:
         - !Ref UtilsLayer
       Role: !GetAtt ListCartRole.Arn

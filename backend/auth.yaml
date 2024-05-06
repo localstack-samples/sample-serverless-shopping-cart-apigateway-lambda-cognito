@@ -8,7 +8,7 @@ Description: >
 
 Globals:
   Function:
-    Timeout: 3
+    Timeout: 300
 
 Resources:
   CognitoUserPool:
