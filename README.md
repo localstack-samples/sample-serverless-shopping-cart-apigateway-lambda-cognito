@@ -30,17 +30,27 @@ The products in an anonymous cart are terminated after some time, while an authe
 | `/product`                 | `GET`  | Retrieve details for all products.                                                                                              |
 | `/product/{product_id}`    | `GET`  | Retrieve details for a single product.                                                                                          |
 
-## Instructions
+## Prerequisites
 
-- LocalStack Pro with the [`localstack` CLI](https://docs.localstack.cloud/getting-started/installation/#localstack-cli).
+- A valid [LocalStack for AWS license](https://localstack.cloud/pricing). Your license provides a [`LOCALSTACK_AUTH_TOKEN`](https://docs.localstack.cloud/getting-started/auth-token/) to activate LocalStack.
+- [`localstack` CLI](https://docs.localstack.cloud/getting-started/installation/#localstack-cli).
 - [Serverless Application Model](https://docs.localstack.cloud/user-guide/integrations/aws-sam/) with the [`samlocal`](https://github.com/localstack/aws-sam-cli-local) installed.
 - [AWS CLI](https://docs.localstack.cloud/user-guide/integrations/aws-cli/) with the [`awslocal` wrapper](https://docs.localstack.cloud/user-guide/integrations/aws-cli/#localstack-aws-cli-awslocal).
 - [Node.js](https://nodejs.org/en/download/) with [`yarn`](https://yarnpkg.com/getting-started/install) installed.
 - [Python 3.8.0](https://www.python.org/downloads/release/python-380/) in the `PATH`
 - [LocalSurf](https://docs.localstack.cloud/user-guide/tools/localsurf/) to repoint AWS service calls to LocalStack in the web app.
 
+## Start LocalStack
 
-Start LocalStack Pro with the `LOCALSTACK_AUTH_TOKEN` pre-configured:
+Start LocalStack with the `LOCALSTACK_AUTH_TOKEN` pre-configured:
+
+```shell
+export LOCALSTACK_AUTH_TOKEN=<your-auth-token>
+make start
+make ready
+```
+
+Alternatively, you can start LocalStack directly with the extra CORS configuration required by this application:
 
 ```shell
 export LOCALSTACK_AUTH_TOKEN=<your-auth-token>
