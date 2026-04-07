@@ -31,6 +31,11 @@ Globals:
       AllowOrigin: !Sub "'${AllowedOrigin}'"
 
 Resources:
+  ProductServiceApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+
   GetProductFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -40,6 +45,7 @@ Resources:
         ListCart:
           Type: Api
           Properties:
+            RestApiId: !Ref ProductServiceApi
             Path: /product/{product_id}
             Method: get
 
@@ -52,6 +58,7 @@ Resources:
         ListCart:
           Type: Api
           Properties:
+            RestApiId: !Ref ProductServiceApi
             Path: /product
             Method: get
 
@@ -60,10 +67,10 @@ Resources:
     Properties:
       Type: String
       Name: /serverless-shopping-cart-demo/products/products-api-url
-      Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.localhost.localstack.cloud/Prod"
+      Value: !Sub "https://${ProductServiceApi}.execute-api.${AWS::Region}.localhost.localstack.cloud/Prod"
 
 
 Outputs:
   ProductApi:
     Description: "API Gateway endpoint URL for Prod stage for Product Mock Service"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.localhost.localstack.cloud/Prod"
+    Value: !Sub "https://${ProductServiceApi}.execute-api.${AWS::Region}.localhost.localstack.cloud/Prod"

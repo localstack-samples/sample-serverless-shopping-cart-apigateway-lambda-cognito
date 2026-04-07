@@ -39,7 +39,7 @@ jobs:
 
       - name: Start LocalStack
         env:
-          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN || secrets.LOCALSTACK_API_KEY }}
           DNS_ADDRESS: 0
         run: |
           pip install localstack awscli-local[ver1]
