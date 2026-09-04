@@ -7,22 +7,18 @@ usage:		## Show this help
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$//' | sed -e 's/##//'
 
 install:	## Install dependencies
-	@which localstack || pip install localstack
-	@which awslocal || pip install awscli-local
+	@which lstk || npm install -g @localstack/lstk
+	@which aws || pip install awscli
 
 start:		## Start LocalStack
 	@test -n "${LOCALSTACK_AUTH_TOKEN}" || (echo "LOCALSTACK_AUTH_TOKEN is not set. Find your token at https://app.localstack.cloud/workspace/auth-token"; exit 1)
-	@LOCALSTACK_AUTH_TOKEN=$(LOCALSTACK_AUTH_TOKEN) localstack start -d
+	@LOCALSTACK_AUTH_TOKEN=$(LOCALSTACK_AUTH_TOKEN) lstk start
 
 stop:		## Stop LocalStack
-	@localstack stop
-
-ready:		## Wait until LocalStack is ready
-	@echo Waiting on the LocalStack container...
-	@localstack wait -t 30 && echo LocalStack is ready to use! || (echo Gave up waiting on LocalStack, exiting. && exit 1)
+	@lstk stop
 
 logs:		## Save the logs in a separate file
-	@localstack logs > logs.txt
+	@lstk logs > logs.txt
 
 all: backend frontend-build
 
@@ -51,7 +47,7 @@ backend-tests:
 
 create-bucket:
 	@echo "Checking if S3 bucket exists s3://$(S3_BUCKET)"
-	@awslocal s3api head-bucket --bucket $(S3_BUCKET) || (echo "bucket does not exist at s3://$(S3_BUCKET), creating it..." ; awslocal s3 mb s3://$(S3_BUCKET) --region $(REGION))
+	@lstk aws s3api head-bucket --bucket $(S3_BUCKET) || (echo "bucket does not exist at s3://$(S3_BUCKET), creating it..." ; lstk aws s3 mb s3://$(S3_BUCKET) --region $(REGION))
 
 amplify-deploy:
 	aws cloudformation deploy \
@@ -70,4 +66,4 @@ frontend-serve:
 frontend-build: 
 	$(MAKE) -C frontend build
 
-.PHONY: usage install start stop ready logs all backend backend-delete backend-tests create-bucket amplify-deploy frontend-serve frontend-build
+.PHONY: usage install start stop logs all backend backend-delete backend-tests create-bucket amplify-deploy frontend-serve frontend-build
