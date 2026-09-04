@@ -32,10 +32,10 @@ The products in an anonymous cart are terminated after some time, while an authe
 
 ## Prerequisites
 
-- A valid [LocalStack for AWS license](https://localstack.cloud/pricing). Your license provides a [`LOCALSTACK_AUTH_TOKEN`](https://docs.localstack.cloud/getting-started/auth-token/) to activate LocalStack.
-- [`localstack` CLI](https://docs.localstack.cloud/getting-started/installation/#localstack-cli).
-- [Serverless Application Model](https://docs.localstack.cloud/user-guide/integrations/aws-sam/) with the [`samlocal`](https://github.com/localstack/aws-sam-cli-local) installed.
-- [AWS CLI](https://docs.localstack.cloud/user-guide/integrations/aws-cli/) with the [`awslocal` wrapper](https://docs.localstack.cloud/user-guide/integrations/aws-cli/#localstack-aws-cli-awslocal).
+- A valid [LocalStack for AWS license](https://localstack.cloud/pricing). Your license provides a [`LOCALSTACK_AUTH_TOKEN`](https://docs.localstack.cloud/aws/getting-started/auth-token/) to activate LocalStack.
+- [`lstk` CLI](https://docs.localstack.cloud/aws/developer-tools/running-localstack/lstk/).
+- [Serverless Application Model](https://docs.localstack.cloud/user-guide/integrations/aws-sam/) with `aws-sam-cli` installed, used via the `lstk sam` proxy.
+- [AWS CLI](https://docs.localstack.cloud/user-guide/integrations/aws-cli/), required by `lstk aws`.
 - [Node.js](https://nodejs.org/en/download/) with [`yarn`](https://yarnpkg.com/getting-started/install) installed.
 - [Python 3.8.0](https://www.python.org/downloads/release/python-380/) in the `PATH`
 - [LocalSurf](https://docs.localstack.cloud/user-guide/tools/localsurf/) to repoint AWS service calls to LocalStack in the web app.
@@ -47,17 +47,16 @@ Start LocalStack with the `LOCALSTACK_AUTH_TOKEN` pre-configured:
 ```shell
 export LOCALSTACK_AUTH_TOKEN=<your-auth-token>
 make start
-make ready
 ```
 
 Alternatively, you can start LocalStack directly with the extra CORS configuration required by this application:
 
 ```shell
 export LOCALSTACK_AUTH_TOKEN=<your-auth-token>
-EXTRA_CORS_ALLOWED_ORIGINS=http://localhost:8080 DEBUG=1 localstack start
+LOCALSTACK_EXTRA_CORS_ALLOWED_ORIGINS=http://localhost:8080 LOCALSTACK_DEBUG=1 lstk start
 ```
 
-The `EXTRA_CORS_ALLOWED_ORIGINS` configuration variable allows our website to send requests to the container APIs. We specified `DEBUG=1` to get the printed LocalStack logs directly in the terminal (it helps later, when we need to get the Cognito confirmation code). If you prefer running LocalStack in detached mode, you can add the `-d` flag to the `localstack start` command, and use Docker Desktop to view the logs.
+The `LOCALSTACK_EXTRA_CORS_ALLOWED_ORIGINS` configuration variable allows our website to send requests to the container APIs. We specified `LOCALSTACK_DEBUG=1` to get the printed LocalStack logs directly in the terminal (it helps later, when we need to get the Cognito confirmation code). LocalStack always runs in the background; you can view the logs at any time with `lstk logs` or Docker Desktop.
 
 ## Instructions
 
@@ -114,7 +113,7 @@ For the checkout you will be asked to enter some data. Afterwards, the shopping 
 
 ### GitHub Action
 
-This application sample hosts an example GitHub Action workflow that starts up LocalStack, deploys the infrastructure, and checks the created resources using `awslocal`. You can find the workflow in the `.github/workflows/main.yml` file. To run the workflow, you can fork this repository and push a commit to the `main` branch.
+This application sample hosts an example GitHub Action workflow that starts up LocalStack, deploys the infrastructure, and checks the created resources using `lstk aws`. You can find the workflow in the `.github/workflows/main.yml` file. To run the workflow, you can fork this repository and push a commit to the `main` branch.
 
 Users can adapt this example workflow to run in their own CI environment. LocalStack supports various CI environments, including GitHub Actions, CircleCI, Jenkins, Travis CI, and more. You can find more information about the CI integration in the [LocalStack documentation](https://docs.localstack.cloud/user-guide/ci/).
 
