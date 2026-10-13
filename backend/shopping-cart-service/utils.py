@@ -17,9 +17,9 @@ def get_product_from_external_service(product_id):
     Call product API to retrieve product details
     """
     response = requests.get(product_service_url + f"/product/{product_id}")
-    try:
-        response_dict = response.json()["product"]
-    except KeyError:
+    # The product service answers {"product": null} for an unknown ID
+    response_dict = response.json().get("product")
+    if not response_dict:
         logger.warn("No product found with id %s", product_id)
         raise NotFoundException
 
