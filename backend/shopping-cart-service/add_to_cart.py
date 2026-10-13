@@ -8,6 +8,7 @@ from shared import (
     NotFoundException,
     generate_ttl,
     get_cart_id,
+    get_header,
     get_headers,
     get_user_sub,
 )
@@ -17,7 +18,7 @@ logger = Logger()
 tracer = Tracer()
 metrics = Metrics()
 
-dynamodb = boto3.resource("dynamodb")
+dynamodb = boto3.resource("dynamodb", endpoint_url=os.environ.get("AWS_ENDPOINT_URL"))
 table = dynamodb.Table(os.environ["TABLE_NAME"])
 product_service_url = os.environ["PRODUCT_SERVICE_URL"]
 
@@ -45,7 +46,7 @@ def lambda_handler(event, context):
 
     # Because this method can be called anonymously, we need to check there's a logged in user
     user_sub = None
-    jwt_token = event["headers"].get("Authorization")
+    jwt_token = get_header(event["headers"], "Authorization")
     if jwt_token:
         user_sub = get_user_sub(jwt_token)
 

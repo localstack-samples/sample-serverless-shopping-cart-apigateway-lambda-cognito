@@ -9,7 +9,7 @@ from shared import handle_decimal_type
 logger = Logger()
 tracer = Tracer()
 
-dynamodb = boto3.resource("dynamodb")
+dynamodb = boto3.resource("dynamodb", endpoint_url=os.environ.get("AWS_ENDPOINT_URL"))
 table = dynamodb.Table(os.environ["TABLE_NAME"])
 
 

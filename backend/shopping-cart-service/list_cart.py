@@ -5,12 +5,12 @@ import boto3
 from aws_lambda_powertools import Logger, Tracer
 from boto3.dynamodb.conditions import Key
 
-from shared import get_cart_id, get_headers, get_user_sub, handle_decimal_type
+from shared import get_cart_id, get_header, get_headers, get_user_sub, handle_decimal_type
 
 logger = Logger()
 tracer = Tracer()
 
-dynamodb = boto3.resource("dynamodb")
+dynamodb = boto3.resource("dynamodb", endpoint_url=os.environ.get("AWS_ENDPOINT_URL"))
 table = dynamodb.Table(os.environ["TABLE_NAME"])
 
 
@@ -24,7 +24,7 @@ def lambda_handler(event, context):
     cart_id, generated = get_cart_id(event["headers"])
 
     # Because this method can be called anonymously, we need to check there's a logged in user
-    jwt_token = event["headers"].get("Authorization")
+    jwt_token = get_header(event["headers"], "Authorization")
     if jwt_token:
         user_sub = get_user_sub(jwt_token)
         key_string = f"user#{user_sub}"

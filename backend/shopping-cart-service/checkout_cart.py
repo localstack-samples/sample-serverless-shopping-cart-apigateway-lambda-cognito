@@ -11,7 +11,7 @@ logger = Logger()
 tracer = Tracer()
 metrics = Metrics()
 
-dynamodb = boto3.resource("dynamodb")
+dynamodb = boto3.resource("dynamodb", endpoint_url=os.environ.get("AWS_ENDPOINT_URL"))
 
 logger.debug("Initializing DDB Table %s", os.environ["TABLE_NAME"])
 table = dynamodb.Table(os.environ["TABLE_NAME"])

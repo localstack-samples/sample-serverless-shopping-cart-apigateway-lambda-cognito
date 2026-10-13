@@ -12,9 +12,9 @@ logger = Logger()
 tracer = Tracer()
 metrics = Metrics()
 
-dynamodb = boto3.resource("dynamodb")
+dynamodb = boto3.resource("dynamodb", endpoint_url=os.environ.get("AWS_ENDPOINT_URL"))
 table = dynamodb.Table(os.environ["TABLE_NAME"])
-sqs = boto3.resource("sqs")
+sqs = boto3.resource("sqs", endpoint_url=os.environ.get("AWS_ENDPOINT_URL"))
 queue = sqs.Queue(os.environ["DELETE_FROM_CART_SQS_QUEUE"])
 
 

@@ -35,12 +35,11 @@ jobs:
       - name: Install lstk
         run: |
           npm install -g @localstack/lstk
-          lstk setup aws
+          lstk setup aws --force --non-interactive
 
       - name: Start LocalStack
         env:
-          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN || secrets.LOCALSTACK_API_KEY }}
-          LOCALSTACK_DNS_ADDRESS: 0
+          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
         run: |
           docker pull localstack/localstack-pro:latest
           # Start LocalStack in the background
@@ -55,6 +54,13 @@ jobs:
           lstk aws s3 ls
           lstk aws dynamodb list-tables
           lstk aws sqs list-queues
+
+      - name: Run tests
+        run: make test
+
+      - name: Show LocalStack logs
+        if: failure()
+        run: lstk logs | tail -300
 
       - name: Send a Slack notification
         if: failure() || github.event_name != 'pull_request'
