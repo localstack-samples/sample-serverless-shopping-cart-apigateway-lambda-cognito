@@ -42,6 +42,9 @@ backend-delete:
 	$(MAKE) -C backend delete TEMPLATE=product-mock REGION=${REGION}
 	$(MAKE) -C backend delete TEMPLATE=shoppingcart-service REGION=${REGION}
 
+test:		## Test the deployed application end to end
+	./test.sh
+
 backend-tests:
 	$(MAKE) -C backend tests
 
@@ -66,4 +69,4 @@ frontend-serve:
 frontend-build: 
 	$(MAKE) -C frontend build
 
-.PHONY: usage install start stop logs all backend backend-delete backend-tests create-bucket amplify-deploy frontend-serve frontend-build
+.PHONY: usage install start stop logs test all backend backend-delete backend-tests create-bucket amplify-deploy frontend-serve frontend-build

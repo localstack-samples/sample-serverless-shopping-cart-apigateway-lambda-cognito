@@ -87,6 +87,16 @@ Successfully created/updated stack - aws-serverless-shopping-cart-shoppingcart-s
 
 > If the SAM application build fails, you can check if you have the Python 3.8 installed and in the `PATH`. Alternatively, use [`pyenv`](https://github.com/pyenv/pyenv) to switch between multiple versions of Python.
 
+### Testing the backend
+
+To test the deployed backend end to end, run:
+
+```shell
+make test
+```
+
+The test browses the products, adds and updates items in an anonymous cart, signs in a new Cognito user, migrates the cart to that user, checks the per-product cart total kept by the DynamoDB stream, and checks out.
+
 ### Setting up the front-end
 
 To set up the front-end, run the following command:
@@ -113,7 +123,7 @@ For the checkout you will be asked to enter some data. Afterwards, the shopping 
 
 ### GitHub Action
 
-This application sample hosts an example GitHub Action workflow that starts up LocalStack, deploys the infrastructure, and checks the created resources using `lstk aws`. You can find the workflow in the `.github/workflows/main.yml` file. To run the workflow, you can fork this repository and push a commit to the `main` branch.
+This application sample hosts an example GitHub Action workflow that starts up LocalStack, deploys the infrastructure, and runs `make test` against it. You can find the workflow in the `.github/workflows/main.yml` file. To run the workflow, you can fork this repository and push a commit to the `master` branch.
 
 Users can adapt this example workflow to run in their own CI environment. LocalStack supports various CI environments, including GitHub Actions, CircleCI, Jenkins, Travis CI, and more. You can find more information about the CI integration in the [LocalStack documentation](https://docs.localstack.cloud/user-guide/ci/).
 
