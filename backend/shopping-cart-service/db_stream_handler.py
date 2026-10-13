@@ -8,7 +8,7 @@ from boto3.dynamodb import types
 logger = Logger()
 tracer = Tracer()
 
-dynamodb = boto3.resource("dynamodb")
+dynamodb = boto3.resource("dynamodb", endpoint_url=os.environ.get("AWS_ENDPOINT_URL"))
 table = dynamodb.Table(os.environ["TABLE_NAME"])
 
 deserializer = types.TypeDeserializer()
