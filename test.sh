@@ -94,7 +94,7 @@ echo "PASS: listed $count products and fetched '$PRODUCT_NAME'"
 BASE_TOTAL=$(cart_total)
 [ "$BASE_TOTAL" = "None" ] && BASE_TOTAL=0
 
-# 2. Anonymous cart. The handlers read the lowercase cookie header.
+# 2. Anonymous cart, identified by the cartId cookie as a browser sends it
 CART_ID=$(uuidgen | tr '[:upper:]' '[:lower:]')
 COOKIE="cookie: cartId=$CART_ID"
 

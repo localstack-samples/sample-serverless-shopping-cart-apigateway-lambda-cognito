@@ -68,6 +68,17 @@ def get_user_sub(jwt_token):
     return verified_claims.get("sub")
 
 
+def get_header(event_headers, name):
+    """
+    Return a request header by name. Header names are case-insensitive, and clients send
+    them in different cases (browsers over HTTP/2 lowercase them).
+    """
+    for key, value in (event_headers or {}).items():
+        if key.lower() == name.lower():
+            return value
+    return None
+
+
 @tracer.capture_method
 def get_cart_id(event_headers):
     """
@@ -75,7 +86,7 @@ def get_cart_id(event_headers):
     """
     cookie = SimpleCookie()
     try:
-        cookie.load(event_headers["cookie"])
+        cookie.load(get_header(event_headers, "cookie") or "")
         cart_cookie = cookie["cartId"].value
         generated = False
     except KeyError:
