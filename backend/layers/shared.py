@@ -8,8 +8,16 @@ from http.cookies import SimpleCookie
 from aws_lambda_powertools import Tracer
 
 import cognitojwt
+from cognitojwt import jwt_sync
 
 tracer = Tracer()
+
+# LocalStack injects AWS_ENDPOINT_URL into Lambda containers and serves each user pool's
+# signing keys under it. On AWS the variable is unset and the Cognito URL is used.
+if os.environ.get("AWS_ENDPOINT_URL"):
+    jwt_sync.PUBLIC_KEYS_URL_TEMPLATE = (
+        os.environ["AWS_ENDPOINT_URL"].rstrip("/") + "/{1}/.well-known/jwks.json"
+    )
 
 HEADERS = {
     "Access-Control-Allow-Origin": os.environ.get("ALLOWED_ORIGIN"),
